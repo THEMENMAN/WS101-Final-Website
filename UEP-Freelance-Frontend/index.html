@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UEP Student Freelance Network</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-graduation-cap"></i>
+                UEP Freelance
+            </div>
+            <div class="nav-menu" id="navMenu">
+                <a href="#home" class="nav-link">Home</a>
+                <a href="#jobs" class="nav-link">Find Work</a>
+                <a href="#freelancers" class="nav-link">Find Talent</a>
+                <a href="#post-job" class="nav-link">Post a Job</a>
+                <div class="nav-auth" id="navAuth">
+                    <button id="loginBtn" class="btn-secondary">Login</button>
+                    <button id="registerBtn" class="btn-primary">Sign Up</button>
+                </div>
+                <div class="nav-user" id="navUser" style="display: none;">
+                    <span id="userName"></span>
+                    <div class="user-dropdown">
+                        <button id="userMenu" class="btn-user">
+                            <i class="fas fa-user-circle"></i>
+                            <span id="userNameMenu"></span>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="dropdown-content">
+                            <a href="#dashboard" class="dropdown-link">Dashboard</a>
+                            <a href="#profile" class="dropdown-link">Profile</a>
+                            <a href="#messages" class="dropdown-link">Messages</a>
+                            <a href="#" id="logoutBtn" class="dropdown-link">Logout</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="nav-toggle" id="navToggle">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main id="app">
+        <!-- Content will be dynamically loaded here -->
+        <div class="loading-spinner" id="loadingSpinner" style="display: none;">
+            <div class="spinner"></div>
+            <p>Loading...</p>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-section">
+                <h3><i class="fas fa-graduation-cap"></i> UEP Freelance Network</h3>
+                <p>Connecting UEP students with freelance opportunities in a secure and supportive environment.</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-linkedin"></i></a>
+                </div>
+            </div>
+            <div class="footer-section">
+                <h4>Quick Links</h4>
+                <a href="#home">Home</a>
+                <a href="#jobs">Find Work</a>
+                <a href="#freelancers">Find Talent</a>
+                <a href="#post-job">Post a Job</a>
+            </div>
+            <div class="footer-section">
+                <h4>Support</h4>
+                <a href="#help">Help Center</a>
+                <a href="#terms">Terms of Service</a>
+                <a href="#privacy">Privacy Policy</a>
+                <a href="#contact">Contact Us</a>
+            </div>
+            <div class="footer-section">
+                <h4>Features</h4>
+                <a href="#secure">Secure Payments</a>
+                <a href="#mentorship">Mentorship</a>
+                <a href="#portfolio">Portfolio Showcase</a>
+                <a href="#escrow">Escrow System</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 UEP Student Freelance Network. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Modals -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Login to UEP Freelance</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>UEP Email:</label>
+                    <input type="email" id="loginEmail" placeholder="yourname@uep.edu.ph" required>
+                </div>
+                <div class="form-group">
+                    <label>Password:</label>
+                    <input type="password" id="loginPassword" placeholder="Enter your password" required>
+                </div>
+                <button type="submit" class="btn-primary btn-full">Login</button>
+            </form>
+            <p class="modal-footer">Don't have an account? <a href="#" id="showRegister">Sign up here</a></p>
+        </div>
+    </div>
+
+    <div id="registerModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Join UEP Freelance</h2>
+            <form id="registerForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>First Name:</label>
+                        <input type="text" id="regFirstName" placeholder="John" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Last Name:</label>
+                        <input type="text" id="regLastName" placeholder="Doe" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>UEP Email:</label>
+                    <input type="email" id="regEmail" placeholder="john.doe@uep.edu.ph" required>
+                    <small>Must be a valid @uep.edu.ph email address</small>
+                </div>
+                <div class="form-group">
+                    <label>Phone Number:</label>
+                    <input type="tel" id="regPhone" placeholder="+63 912 345 6789">
+                </div>
+                <div class="form-group">
+                    <label>Password:</label>
+                    <input type="password" id="regPassword" placeholder="Create a strong password" required>
+                </div>
+                <div class="form-group">
+                    <label>I want to:</label>
+                    <select id="regRole" required>
+                        <option value="">Select Role</option>
+                        <option value="STUDENT">Work as Freelancer</option>
+                        <option value="CLIENT">Hire Freelancers</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-primary btn-full">Create Account</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Job Details Modal -->
+    <div id="jobModal" class="modal">
+        <div class="modal-content large">
+            <span class="close">&times;</span>
+            <div id="jobModalContent">
+                <!-- Job details will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert Container -->
+    <div id="alertContainer"></div>
+
+    <!-- Scripts -->
+    <script src="js/auth.js"></script>
+    <script src="js/jobs.js"></script>
+    <script src="js/payment.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
