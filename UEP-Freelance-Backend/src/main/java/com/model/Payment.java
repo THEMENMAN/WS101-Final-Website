@@ -1,43 +1,60 @@
-package com.model;
+package com.uep.freelance.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import java.time.LocalDateTime;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "payments")
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class Payment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    @Column(unique = true, nullable = false)
-    private String transactionId;
-    
-    @Column(nullable = false)
     private BigDecimal amount;
     
-    private String paymentMethod;
-    private String paymentStatus = "PENDING";
+    @Enumerated(EnumType.STRING)
+    private PaymentMethod paymentMethod;
     
-    @Column(nullable = false)
-    private LocalDateTime paymentDate = LocalDateTime.now();
+    @Enumerated(EnumType.STRING)
+    private PaymentStatus status;
     
-    @ManyToOne(fetch = FetchType.LAZY)
+    private String transactionId;
+    private String escrowAccountId;
+    
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+    private LocalDateTime completedAt;
+    private LocalDateTime cancelledAt;
+    
+    @ManyToOne
     @JoinColumn(name = "job_id")
     private Job job;
     
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "client_id")
-    private User client;
+    // No-args constructor
+    public Payment() {
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+        this.status = PaymentStatus.PENDING;
+    }
     
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "freelancer_id")
-    private User freelancer;
+    // Constructor matching your code
+    public Payment(Job job, BigDecimal amount, PaymentMethod paymentMethod) {
+        this();
+        this.job = job;
+        this.amount = amount;
+        this.paymentMethod = paymentMethod;
+        this.status = PaymentStatus.HELD_IN_ESCROW;
+    }
+    
+    // Setter for escrow account
+    public void setEscrowAccountId(String escrowAccountId) {
+        this.escrowAccountId = escrowAccountId;
+    }
+}
+
+enum PaymentMethod {
+    CREDIT_CARD, BANK_TRANSFER, PAYPAL, GCASH, PAYMAYA
 }
