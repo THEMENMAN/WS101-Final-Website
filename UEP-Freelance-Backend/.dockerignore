@@ -1,0 +1,11 @@
+.git
+.gitignore
+*.md
+target/
+build/
+.gradle
+.idea
+.vscode
+Dockerfile*
+docker-compose*
+*.log
