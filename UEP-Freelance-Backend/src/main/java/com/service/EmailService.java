@@ -1,4 +1,4 @@
-package com.uep.freelance.service;
+package com.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
@@ -7,48 +7,44 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class EmailService {
-
-    @Autowired(required = false) // Make it optional for development
+    
+    @Autowired
     private JavaMailSender mailSender;
-
-    public void sendVerificationEmail(String toEmail, String verificationToken) {
-        // Skip email sending if mailSender is not configured (for development)
-        if (mailSender == null) {
-            System.out.println("Email verification token for " + toEmail + ": " + verificationToken);
-            return;
-        }
-
-        try {
-            SimpleMailMessage message = new SimpleMailMessage();
-            message.setTo(toEmail);
-            message.setSubject("Verify Your UEP Freelance Account");
-            message.setText("Please click the following link to verify your account: "
-                    + "http://localhost:8080/api/auth/verify?token=" + verificationToken);
-
-            mailSender.send(message);
-        } catch (Exception e) {
-            System.err.println("Failed to send verification email: " + e.getMessage());
-            // Don't throw exception, just log it
-        }
+    
+    public void sendWelcomeEmail(String to, String name) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(to);
+        message.setSubject("Welcome to UEP Freelance Network!");
+        message.setText("Dear " + name + ",\n\nWelcome to the UEP Freelance Network! "
+                      + "We're excited to have you on board.\n\n"
+                      + "Best regards,\nUEP Freelance Team");
+        
+        mailSender.send(message);
     }
-
-    public void sendPasswordResetEmail(String toEmail, String resetToken) {
-        // Skip email sending if mailSender is not configured
-        if (mailSender == null) {
-            System.out.println("Password reset token for " + toEmail + ": " + resetToken);
-            return;
-        }
-
-        try {
-            SimpleMailMessage message = new SimpleMailMessage();
-            message.setTo(toEmail);
-            message.setSubject("Reset Your UEP Freelance Password");
-            message.setText("Please click the following link to reset your password: "
-                    + "http://localhost:3000/reset-password?token=" + resetToken);
-
-            mailSender.send(message);
-        } catch (Exception e) {
-            System.err.println("Failed to send password reset email: " + e.getMessage());
-        }
+    
+    public void sendJobNotification(String to, String jobTitle, String clientName) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(to);
+        message.setSubject("New Job Posted: " + jobTitle);
+        message.setText("Hello,\n\nA new job has been posted:\n\n"
+                      + "Job Title: " + jobTitle + "\n"
+                      + "Posted by: " + clientName + "\n\n"
+                      + "Login to your account to view and apply for this job.\n\n"
+                      + "Best regards,\nUEP Freelance Team");
+        
+        mailSender.send(message);
+    }
+    
+    public void sendProposalNotification(String to, String jobTitle, String freelancerName) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(to);
+        message.setSubject("New Proposal for: " + jobTitle);
+        message.setText("Hello,\n\nYou have received a new proposal for your job:\n\n"
+                      + "Job Title: " + jobTitle + "\n"
+                      + "From: " + freelancerName + "\n\n"
+                      + "Login to your account to review the proposal.\n\n"
+                      + "Best regards,\nUEP Freelance Team");
+        
+        mailSender.send(message);
     }
 }

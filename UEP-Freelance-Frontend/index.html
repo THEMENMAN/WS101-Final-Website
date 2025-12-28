@@ -6,6 +6,7 @@
     <title>UEP Student Freelance Network</title>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/admin.css">
 </head>
 <body>
     <!-- Navigation -->
@@ -20,12 +21,12 @@
                 <a href="#jobs" class="nav-link">Find Work</a>
                 <a href="#freelancers" class="nav-link">Find Talent</a>
                 <a href="#post-job" class="nav-link">Post a Job</a>
+                <a href="#admin-dashboard" class="nav-link" id="adminLink" style="display: none;">Admin</a>
                 <div class="nav-auth" id="navAuth">
                     <button id="loginBtn" class="btn-secondary">Login</button>
                     <button id="registerBtn" class="btn-primary">Sign Up</button>
                 </div>
                 <div class="nav-user" id="navUser" style="display: none;">
-                    <span id="userName"></span>
                     <div class="user-dropdown">
                         <button id="userMenu" class="btn-user">
                             <i class="fas fa-user-circle"></i>
@@ -33,11 +34,14 @@
                             <i class="fas fa-chevron-down"></i>
                         </button>
                         <div class="dropdown-content">
-                            <a href="#dashboard" class="dropdown-link">Dashboard</a>
-                            <a href="#profile" class="dropdown-link">Profile</a>
-                            <a href="#messages" class="dropdown-link">Messages</a>
-                            <a href="#" id="logoutBtn" class="dropdown-link">Logout</a>
-                        </div>
+    <a href="#dashboard" class="dropdown-link">Dashboard</a>
+    <a href="#profile" class="dropdown-link">Profile</a>
+    <a href="#messages" class="dropdown-link">Messages</a>
+    <a href="#my-jobs" class="dropdown-link">My Jobs</a>
+    <a href="#my-proposals" class="dropdown-link">My Proposals</a>
+    <a href="#settings" class="dropdown-link">Settings</a>
+    <a href="#" id="logoutBtn" class="dropdown-link">Logout</a>
+</div>
                     </div>
                 </div>
             </div>
@@ -102,15 +106,29 @@
             <h2>Login to UEP Freelance</h2>
             <form id="loginForm">
                 <div class="form-group">
-                    <label>UEP Email:</label>
+                    <label>Email:</label>
                     <input type="email" id="loginEmail" placeholder="yourname@uep.edu.ph" required>
+                    <small>Try: admin@uep.edu.ph, client@uep.edu.ph, or student@uep.edu.ph</small>
                 </div>
                 <div class="form-group">
                     <label>Password:</label>
                     <input type="password" id="loginPassword" placeholder="Enter your password" required>
+                    <small>Password is "password123" for all demo accounts</small>
                 </div>
                 <button type="submit" class="btn-primary btn-full">Login</button>
             </form>
+            <div class="demo-accounts">
+                <h4>Demo Accounts (Click to auto-fill):</h4>
+                <div class="demo-account" data-email="admin@uep.edu.ph">
+                    <strong>Admin</strong> - Full system access (password: password123)
+                </div>
+                <div class="demo-account" data-email="client@uep.edu.ph">
+                    <strong>Client</strong> - Post jobs & hire (password: password123)
+                </div>
+                <div class="demo-account" data-email="student@uep.edu.ph">
+                    <strong>Student/Freelancer</strong> - Find work & apply (password: password123)
+                </div>
+            </div>
             <p class="modal-footer">Don't have an account? <a href="#" id="showRegister">Sign up here</a></p>
         </div>
     </div>
@@ -147,8 +165,8 @@
                     <label>I want to:</label>
                     <select id="regRole" required>
                         <option value="">Select Role</option>
-                        <option value="STUDENT">Work as Freelancer</option>
-                        <option value="CLIENT">Hire Freelancers</option>
+                        <option value="STUDENT">Work as Freelancer/Student</option>
+                        <option value="CLIENT">Hire Freelancers (Client)</option>
                     </select>
                 </div>
                 <button type="submit" class="btn-primary btn-full">Create Account</button>
@@ -166,6 +184,36 @@
         </div>
     </div>
 
+    <!-- Proposal Modal -->
+    <div id="proposalModal" class="modal">
+        <div class="modal-content large">
+            <span class="close">&times;</span>
+            <div id="proposalModalContent">
+                <!-- Proposal form will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Modal -->
+    <div id="paymentModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div id="paymentModalContent">
+                <!-- Payment form will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Message Modal -->
+    <div id="messageModal" class="modal">
+        <div class="modal-content large">
+            <span class="close">&times;</span>
+            <div id="messageModalContent">
+                <!-- Message form will be loaded here -->
+            </div>
+        </div>
+    </div>
+
     <!-- Alert Container -->
     <div id="alertContainer"></div>
 
@@ -174,6 +222,8 @@
     <script src="js/jobs.js"></script>
     <script src="js/payment.js"></script>
     <script src="js/ui.js"></script>
+    <script src="js/admin.js"></script>
+    <script src="js/messages.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>

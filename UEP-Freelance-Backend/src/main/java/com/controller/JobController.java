@@ -1,91 +1,173 @@
-package com.uep.freelance.controller;
 
-import com.uep.freelance.dto.JobRequest;
-import com.uep.freelance.model.Job;
-import com.uep.freelance.model.Proposal;
-import com.uep.freelance.model.JobCategory;
-import com.uep.freelance.service.JobService;
-import org.springframework.beans.factory.annotation.Autowired;
+package com.controller;  // Fixed package path
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import java.math.BigDecimal;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
+import com.dto.JobDTO;
+import com.model.JobStatus;
+import com.service.JobService;
 import java.util.List;
-import java.util.Map;
+import java.util.NoSuchElementException;
+import java.time.Instant; 
 
 @RestController
 @RequestMapping("/api/jobs")
 @CrossOrigin(origins = "*")
+@Validated
 public class JobController {
 
-    @Autowired
-    private JobService jobService;
+    private static final Logger logger = LoggerFactory.getLogger(JobController.class);
 
-    @GetMapping
-    public ResponseEntity<List<Job>> getAllOpenJobs() {
-        return ResponseEntity.ok(jobService.getAllOpenJobs());
+    private final JobService jobService;
+
+    public JobController(JobService jobService) {
+        this.jobService = jobService;
     }
-    @GetMapping("/category/{category}")
-    public ResponseEntity<?> getJobsByCategory(@PathVariable String category) {
+
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> createJob(@Valid @RequestBody JobDTO jobDTO) {
         try {
-            JobCategory jobCategory = JobCategory.valueOf(category.toUpperCase());
-            return ResponseEntity.ok(jobService.getJobsByCategory(jobCategory));
+            JobDTO createdJob = jobService.createJob(jobDTO);
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdJob);
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body("Invalid category: " + category);
+            logger.warn("Failed to create job: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(new ApiError(e.getMessage(), Instant.now().toEpochMilli()));
+        } catch (Exception e) {
+            logger.error("Unexpected error creating job", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiError("Internal server error", Instant.now().toEpochMilli()));
         }
     }
 
-    @PostMapping
-    public ResponseEntity<?> createJob(@RequestBody JobRequest jobRequest, Authentication authentication) {
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> getAllJobs() {
         try {
-            String clientEmail = authentication.getName();
-            Job job = jobService.createJob(jobRequest, clientEmail);
+            List<JobDTO> jobs = jobService.getAllJobs();
+            return ResponseEntity.ok(jobs);
+        } catch (Exception e) {
+            logger.error("Error fetching all jobs", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiError("Internal server error", Instant.now().toEpochMilli()));
+        }
+    }
+
+    @GetMapping(value = "/open", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> getOpenJobs() {
+        try {
+            List<JobDTO> jobs = jobService.getOpenJobs();
+            return ResponseEntity.ok(jobs);
+        } catch (Exception e) {
+            logger.error("Error fetching open jobs", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiError("Internal server error", Instant.now().toEpochMilli()));
+        }
+    }
+
+    @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> getJobById(@PathVariable @Positive Long id) {
+        try {
+            JobDTO job = jobService.getJobById(id);
             return ResponseEntity.ok(job);
+        } catch (NoSuchElementException e) {
+            logger.warn("Job not found with id {}", id);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiError("Job not found", Instant.now().toEpochMilli()));
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            logger.error("Error fetching job by id {}", id, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiError("Internal server error", Instant.now().toEpochMilli()));
         }
     }
 
-    @PostMapping("/{jobId}/proposals")
-    public ResponseEntity<?> submitProposal(@PathVariable Long jobId, @RequestBody Map<String, Object> proposalData,
-                                            Authentication authentication) {
+    @GetMapping(value = "/my-jobs", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> getMyJobs() {
         try {
-            String studentEmail = authentication.getName();
-            String coverLetter = (String) proposalData.get("coverLetter");
-            BigDecimal proposedAmount = new BigDecimal(proposalData.get("proposedAmount").toString());
-            Integer estimatedDays = (Integer) proposalData.get("estimatedDays");
-
-            Proposal proposal = jobService.submitProposal(jobId, studentEmail, coverLetter, proposedAmount, estimatedDays);
-            return ResponseEntity.ok(proposal);
+            List<JobDTO> jobs = jobService.getJobsByClient();
+            return ResponseEntity.ok(jobs);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            logger.error("Error fetching client's jobs", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiError("Internal server error", Instant.now().toEpochMilli()));
         }
     }
 
-    @PostMapping("/proposals/{proposalId}/accept")
-    public ResponseEntity<?> acceptProposal(@PathVariable Long proposalId, Authentication authentication) {
+    @GetMapping(value = "/search", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> searchJobs(@RequestParam(required = false) String keyword,
+                                        @RequestParam(required = false) String category) {
         try {
-            String clientEmail = authentication.getName();
-            Job job = jobService.acceptProposal(proposalId, clientEmail);
-            return ResponseEntity.ok(job);
+            List<JobDTO> jobs = jobService.searchJobs(keyword, category);
+            return ResponseEntity.ok(jobs);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            logger.error("Error searching jobs", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiError("Internal server error", Instant.now().toEpochMilli()));
         }
     }
 
-    @GetMapping("/my-jobs")
-    public ResponseEntity<?> getMyJobs(Authentication authentication) {
-        String userEmail = authentication.getName();
+    @PutMapping(value = "/{id}/status", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> updateJobStatus(@PathVariable @Positive Long id, @RequestParam JobStatus status) {
+        try {
+            JobDTO updatedJob = jobService.updateJobStatus(id, status);
+            return ResponseEntity.ok(updatedJob);
+        } catch (NoSuchElementException e) {
+            logger.warn("Cannot update status, job not found: {}", id);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiError("Job not found", Instant.now().toEpochMilli()));
+        } catch (IllegalArgumentException e) {
+            logger.warn("Invalid status update for job {}: {}", id, e.getMessage());
+            return ResponseEntity.badRequest().body(new ApiError(e.getMessage(), Instant.now().toEpochMilli()));
+        } catch (Exception e) {
+            logger.error("Error updating job status {}", id, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiError("Internal server error", Instant.now().toEpochMilli()));
+        }
+    }
 
-        List<Job> clientJobs = jobService.getClientJobs(userEmail);
-        List<Job> studentJobs = jobService.getStudentJobs(userEmail);
+    @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> updateJob(@PathVariable @Positive Long id, @Valid @RequestBody JobDTO jobDTO) {
+        try {
+            JobDTO updatedJob = jobService.updateJob(id, jobDTO);
+            return ResponseEntity.ok(updatedJob);
+        } catch (NoSuchElementException e) {
+            logger.warn("Cannot update, job not found: {}", id);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiError("Job not found", Instant.now().toEpochMilli()));
+        } catch (IllegalArgumentException e) {
+            logger.warn("Invalid job update for {}: {}", id, e.getMessage());
+            return ResponseEntity.badRequest().body(new ApiError(e.getMessage(), Instant.now().toEpochMilli()));
+        } catch (Exception e) {
+            logger.error("Error updating job {}", id, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiError("Internal server error", Instant.now().toEpochMilli()));
+        }
+    }
 
-        Map<String, Object> response = Map.of(
-                "clientJobs", clientJobs,
-                "studentJobs", studentJobs
-        );
+    @DeleteMapping(value = "/{id}")
+    public ResponseEntity<?> deleteJob(@PathVariable @Positive Long id) {
+        try {
+            jobService.deleteJob(id);
+            return ResponseEntity.noContent().build();
+        } catch (NoSuchElementException e) {
+            logger.warn("Cannot delete, job not found: {}", id);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiError("Job not found", Instant.now().toEpochMilli()));
+        } catch (Exception e) {
+            logger.error("Error deleting job {}", id, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiError("Internal server error", Instant.now().toEpochMilli()));
+        }
+    }
 
-        return ResponseEntity.ok(response);
+    // Simple structured error payload
+    private static class ApiError {
+        private final String message;
+        private final long timestamp;
+
+        public ApiError(String message, long timestamp) {
+            this.message = message;
+            this.timestamp = timestamp;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+
+        public long getTimestamp() {
+            return timestamp;
+        }
     }
 }
